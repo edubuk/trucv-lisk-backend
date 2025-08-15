@@ -3,7 +3,7 @@ import { config } from "dotenv";
 import { MongoConnection } from "../database/mongo.connection";
 import cvRouter from "../routers/cv.router";
 import bodyParser from "body-parser";
-//import cors from "cors";
+import cors from "cors";
 
 // Initialize dotenv and Express app
 config();
@@ -11,7 +11,7 @@ const app = express();
 MongoConnection();
 // Middleware
 
-app.use();
+app.use(cors());
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
