@@ -108,6 +108,12 @@ interface cvSchemaDataType extends Document {
   profileSummaryVerification: ProfileSummaryVerificationType;
 }
 
+enum statusType {
+  pending = "pending",
+  approved = "approved",
+  rejected = "rejected",
+}
+
 const CvSchema: Schema<cvSchemaDataType> = new Schema(
   {
     nanoId: {
@@ -264,6 +270,11 @@ const CvSchema: Schema<cvSchemaDataType> = new Schema(
           default: [],
         },
         // TODO: mail status;
+        mailStatus: {
+          type: String,
+          enum: Object.values(statusType),
+          default: statusType.pending,
+        }
 
       },
       class12: {
@@ -276,6 +287,11 @@ const CvSchema: Schema<cvSchemaDataType> = new Schema(
           default: [],
         },
         // TODO: mail status;
+        mailStatus: {
+          type: String,
+          enum: Object.values(statusType),
+          default: statusType.pending,
+        }
       },
       undergraduation: {
         isSelfAttested: {
@@ -287,6 +303,11 @@ const CvSchema: Schema<cvSchemaDataType> = new Schema(
           default: [],
         },
         // TODO: mail status;
+        mailStatus: {
+          type: String,
+          enum: Object.values(statusType),
+          default: statusType.pending,
+        },
 
       },
       postgraduation: {
@@ -299,6 +320,11 @@ const CvSchema: Schema<cvSchemaDataType> = new Schema(
           default: [],
         },
         // TODO: mail status;
+        mailStatus: {
+          type: String,
+          enum: Object.values(statusType),
+          default: statusType.pending,
+        }
       },
     },
     // step 3;
@@ -315,6 +341,11 @@ const CvSchema: Schema<cvSchemaDataType> = new Schema(
         },
 
         // TODO: mail status;
+        mailStatus: {
+          type: String,
+          enum: Object.values(statusType),
+          default: statusType.pending,
+        }
       },
     },
     // step 4;
@@ -331,6 +362,11 @@ const CvSchema: Schema<cvSchemaDataType> = new Schema(
         },
 
         // TODO: mail status;
+        mailStatus: {
+          type: String,
+          enum: Object.values(statusType),
+          default: statusType.pending,
+        }
       },
     },
     // step 5;
@@ -348,6 +384,11 @@ const CvSchema: Schema<cvSchemaDataType> = new Schema(
         },
 
         // TODO: mail status;
+        mailStatus: {
+          type: String,
+          enum: Object.values(statusType),
+          default: statusType.pending,
+        }
       },
     },
     //course verification
@@ -364,6 +405,11 @@ const CvSchema: Schema<cvSchemaDataType> = new Schema(
         },
 
         // TODO: mail status;
+        mailStatus: {
+          type: String,
+          enum: Object.values(statusType),
+          default: statusType.pending,
+        }
       },
     },
     //project verification
