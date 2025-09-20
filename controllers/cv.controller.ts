@@ -25,17 +25,21 @@ type EducationType = {
   class10School?: string;
   class10Board?: string;
   class10Grade?: string;
+  class10CertUrl?:string,
   class12College?: string;
   class12Board?: string;
   class12Grade?: string;
+  class12CertUrl?:string;
   underGraduateCollege?: string;
   underGraduateDegree?: string;
   underGraduateGPA?: string;
   underGraduateDuration?:string;
+  underGraduateCertUrl?:string,
   postGraduateCollege?: string;
   postGraduateDegree?: string;
   postGraduateGPA?: string;
   postGraduateDuration?:string;
+  postGraduateCertUrl?:string,
 
 };
 
@@ -60,6 +64,10 @@ type AchievementsObjectType = {
   courses?: CourseObjectType[] | [];
   projects?: ProjectObjectType[] | [];
 };
+type SkillObjectType = {
+  skillName: string;
+  skillUrl?:string,
+};
 
 // Main data type with personal details and education
 type DataToBeStoredType = {
@@ -67,7 +75,7 @@ type DataToBeStoredType = {
   personalDetails: PersonalDetailsType;
   education: EducationType;
   experience: ExperienceObjectType[] | [];
-  skills: string[] | [];
+  skills: SkillObjectType[] | [];
   achievements?: AchievementsObjectType;
   profile_summary: string;
   // verifications;
@@ -102,19 +110,23 @@ interface RequestBodyType {
   class10SchoolName: string;
   class10Board: string;
   class10Grade: string;
+  class10CertUrl?:string,
   class12CollegeName?: string;
   class12Board?: string;
   class12Grade?: string;
+  class12CertUrl?:string,
   underGraduateCollegeName?: string;
   underGraduateDegreeName?: string;
   underGraduateGPA?: string;
   underGraduateDuration?:string;
+  underGraduateCertUrl?:string,
   postGraduateCollegeName?: string;
   postGraduateDegreeName?: string;
   postGraduateGPA?: string;
   postGraduateDuration?:string;
+  postGraduateCertUrl?:string,
   Experience: ExperienceObjectType[] | []; // Experience is an array of objects
-  Skills: string[];
+  Skills: SkillObjectType[];
   Awards: AwardObjectType[] | [];
   Courses: CourseObjectType[] | [];
   Projects: ProjectObjectType[] | [];
@@ -151,15 +163,19 @@ export const createCv = async (req: Request, res: Response) => {
       class10SchoolName,
       class10Board,
       class10Grade,
+      class10CertUrl,
       class12CollegeName,
       class12Board,
       class12Grade,
+      class12CertUrl,
       underGraduateCollegeName,
       underGraduateDegreeName,
       underGraduateGPA,
+      underGraduateCertUrl,
       underGraduateDuration,
       postGraduateCollegeName,
       postGraduateDegreeName,
+      postGraduateCertUrl,
       postGraduateGPA,
       postGraduateDuration,
       Experience,
@@ -177,10 +193,11 @@ export const createCv = async (req: Request, res: Response) => {
       projectsVerifications,
       profileSummaryVerification,
     } = req.body as RequestBodyType;
-
-    console.log("undergraduate duration",underGraduateDuration)
+    console.log("req body",req.body);
+    //console.log("undergraduate duration",underGraduateDuration)
     if (
       !loginMailId ||
+      !nanoId ||
       !name ||
       !email ||
       !location ||
@@ -214,7 +231,7 @@ export const createCv = async (req: Request, res: Response) => {
       },
       education: {},
       experience: [],
-      skills: [],
+      skills: Skills,
       profile_summary,
       // verifications;
       personalDetailsVerification,
@@ -256,24 +273,25 @@ export const createCv = async (req: Request, res: Response) => {
     addEducationFields("class10School", class10SchoolName);
     addEducationFields("class10Board", class10Board);
     addEducationFields("class10Grade", class10Grade);
+    addEducationFields("class10CertUrl", class10CertUrl);
 
     // class12fields;
     addEducationFields("class12College", class12CollegeName);
     addEducationFields("class12Board", class12Board);
     addEducationFields("class12Grade", class12Grade);
-
+    addEducationFields("class12CertUrl", class12CertUrl);
     // undergraduate fields;
     addEducationFields("underGraduateCollege", underGraduateCollegeName);
     addEducationFields("underGraduateDegree", underGraduateDegreeName);
     addEducationFields("underGraduateGPA", underGraduateGPA);
     addEducationFields("underGraduateDuration", underGraduateDuration);
-
+    addEducationFields("underGraduateCertUrl", underGraduateCertUrl);
     // postGraduate fields;
     addEducationFields("postGraduateCollege", postGraduateCollegeName);
     addEducationFields("postGraduateDegree", postGraduateDegreeName);
     addEducationFields("postGraduateGPA", postGraduateGPA);
     addEducationFields("postGraduateDuration", postGraduateDuration);
-
+    addEducationFields("postGraduateCertUrl", postGraduateCertUrl);
     
 
     if (Experience?.length > 0) {
@@ -306,25 +324,34 @@ export const createCv = async (req: Request, res: Response) => {
 
     const cvData = await CV.create(dataToBeStored);
     if(cvData)
+    {
+    // await User.findOneAndUpdate(
+    //   { email:loginMailId },
+    //   { $push: { documentIds: cvData._id } },
+    //   { new: true, upsert: true }
+    // );
+    //mapping of all cv nanoIds with user email
+    //console.log("cvData",cvData);
     await User.findOneAndUpdate(
-      { email:loginMailId },
-      { $push: { documentIds: cvData._id } },
+      {email:loginMailId},
+      { $push: { nanoIds: cvData.nanoId } },
       { new: true, upsert: true }
     );
-
+    }
     return res.json(cvData);
   } catch (error) {
     console.log("ERROR:IN CREATE-CV CONTROLLER", error);
-    res.status(500).json("ERROR:IN CREATE-CV CONTROLLER");
+    res.status(500).json({success:false,error:error,message:"ERROR:IN CREATE-CV CONTROLLER"});
   }
 };
 
 export const getAllCvIds= async(req:Request,res:Response)=>{
   try {
+    console.log("req params",req.params);
     const {email} = req.params;
     // Find the user by email
-    const user: IUser | null = await User.findOne({ email }).select("documentIds");
-
+    const user: IUser | null = await User.findOne({ email });
+    console.log("user",user);
     if (!user) {
       console.log("User not found");
       return res.status(500).json({
@@ -334,12 +361,14 @@ export const getAllCvIds= async(req:Request,res:Response)=>{
     }
 
     // Return the array of document IDs
-    const Ids= user.documentIds.map((id) => id.toString());
-    return res.status(200).json({success:true,Ids});
+    const Ids= user.nanoIds.map((id:string) => id.toString());
+
+    //console.log("Ids",Ids);
+    return res.status(200).json({success:true,userData:user});
     
   } catch (error) {
     console.log("ERROR:IN getAllCVIds", error);
-    res.status(500).json("ERROR:IN getAllCVIds CONTROLLER");
+    res.status(500).json({success:false,error:error,message:"ERROR:IN getAllCVIds"});
   }
 }
 
@@ -358,6 +387,61 @@ export const getCv = async (req: Request, res: Response) => {
   }
 };
 
+export const getCvByNanoId = async (req: Request, res: Response) => {
+  try {
+    const { nanoId } = req.params;
+    console.log("nanoId",nanoId);
+    const cv = await CV.findOne({ nanoId });
+    if (!cv) {
+      return res.status(404).json("No CV Found!");
+    }
+    //console.log("cv",cv);
+    return res.status(200).json(cv);
+  } catch (error) {
+    console.log("ERROR:GET_CV_BY_NANO_ID_CONTROLLER", error);
+    res.status(500).json({success:false,error:error,message:"ERROR:GET_CV_BY_NANO_ID_CONTROLLER"});
+  }
+};
+
+// export const getAllCvIds= async(req:Request,res:Response)=>{
+//   try {
+//     const {email} = req.params;
+//     // Find the user by email
+//     const user: IUser | null = await User.findOne({ email }).select("documentIds");
+
+//     if (!user) {
+//       console.log("User not found");
+//       return res.status(500).json({
+//         success:false,
+//         message:"No Cv Found"})
+
+//     }
+
+//     // Return the array of document IDs
+//     const Ids= user.documentIds.map((id) => id.toString());
+//     return res.status(200).json({success:true,Ids});
+    
+//   } catch (error) {
+//     console.log("ERROR:IN getAllCVIds", error);
+//     res.status(500).json("ERROR:IN getAllCVIds CONTROLLER");
+//   }
+// }
+
+// export const getCv = async (req: Request, res: Response) => {
+//   try {
+//     const { id } = req.params;
+//     const cv = await CV.findById(id);
+//     if (!cv) {
+//       return res.status(404).json("No CV Found!");
+//     }
+
+//     return res.status(200).json(cv);
+//   } catch (error) {
+//     console.log("ERROR:GET_CV_CONTROLLER", error);
+//     res.status(500).json("ERROR:GET_CV_CONTROLLER");
+//   }
+// };
+
 const statusType = {
   pending: "pending",
   approved: "approved",
@@ -375,9 +459,11 @@ export const verifyDoc = async (req: Request, res: Response) => {
         { $set: { [fieldPath]: statusType.approved } },
         { new: true }
       );
-
-      if (!updatedCv) {
+      console.log("updatedCv",updatedCv);
+      if (updatedCv===null) {
+        window.alert("User has not submitted their CV");
         return res.status(404).json({ message: "CV not found!" });
+        
       }
 
       console.log("Mail status updated");
@@ -392,6 +478,7 @@ export const verifyDoc = async (req: Request, res: Response) => {
       );
 
       if (!updatedCv) {
+        window.alert("User has not submitted their CV");
         return res.status(404).json({ message: "CV not found!" });
       }
 
@@ -411,7 +498,7 @@ export const verifyDoc = async (req: Request, res: Response) => {
 
     // Existing logic to display HTML content...
     const response = await axios.get(
-      `https://${process.env.pinataGateway}/ipfs/${pinataHash}`,
+      `${process.env.VITE_AzureGATWAY}/${pinataHash}`,
       { responseType: "arraybuffer" }
     );
 
@@ -708,7 +795,7 @@ export const verifyDoc = async (req: Request, res: Response) => {
                     }
                 } catch (error) {
                     console.error('Error:', error);
-                    alert('Failed to approve the document. Please retry...');
+                    alert('User has not submitted their CV. Please try after some time');
                 }
             });
             document.getElementById('reject').addEventListener('click', async () => {
@@ -744,7 +831,7 @@ export const verifyDoc = async (req: Request, res: Response) => {
                     }
                 } catch (error) {
                     console.error('Error:', error);
-                    alert('Failed to reject the document. Please retry...');
+                    alert('user has not submitted their CV. Please try after some time');
                 }
             });
         </script>

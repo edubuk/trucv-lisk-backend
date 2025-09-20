@@ -17,25 +17,30 @@ type personalDetailsObjectType = {
   phoneNumber: string;
   profession: string;
   imageUrl: string;
-  linkedinProfile:string;
-  twitterProfile:string;
-  telegramProfile:string;
-  instagramProfile:string;
+  linkedinProfile?:string;
+  twitterProfile?:string;
+  telegramProfile?:string;
+  instagramProfile?:string;
+  githubProfile?:string;
   years_of_experience: string;
 };
 type EducationObjectType = {
   class10School: string;
   class10Board: string;
   class10Grade: Number;
+  class10CertUrl?:string,
   class12College: string;
   class12Board: string;
   class12Grade: Number;
+  class12CertUrl?:string;
   underGraduateCollege: string;
   underGraduateDegree: string;
   underGraduateGPA: Number;
+  underGraduateCertUrl?:string;
   postGraduateCollege: string;
   postGraduateDegree: string;
   postGraduateGPA: Number;
+  postGraduateCertUrl?:string;
 };
 export type ExperienceObjectType = {
   company_name: string;
@@ -45,16 +50,19 @@ export type ExperienceObjectType = {
     to: string;
   };
   job_role: string;
+  experienceCertUrl?:string,
 };
 export type AwardObjectType = {
   award_name: string;
   awarding_organization: string;
   date_of_achievement: string;
   description: string;
+  awardCertUrl?:string,
 };
 export type CourseObjectType = {
   course_name: string;
   organization: string;
+  courseCertUrl?:string,
   duration: {
     from: string;
     to: string;
@@ -64,6 +72,7 @@ export type CourseObjectType = {
 export type ProjectObjectType = {
   project_name: string;
   project_url: string;
+  projectCertUrl?:string,
   duration: {
     from: string;
     to: string;
@@ -71,12 +80,17 @@ export type ProjectObjectType = {
   description: string;
 };
 
+export type SkillObjectType = {
+  skillName: string;
+  skillUrl?:string,
+};
+
 interface cvSchemaDataType extends Document {
   nanoId: string;
   personalDetails: personalDetailsObjectType;
   education: EducationObjectType;
   experience: ExperienceObjectType[];
-  skills: string[];
+  skills: SkillObjectType[];
   achievements: {
     awards: AwardObjectType[];
     courses: CourseObjectType[];
@@ -93,11 +107,7 @@ interface cvSchemaDataType extends Document {
   projectsVerifications: ProjectVerificationType;
   profileSummaryVerification: ProfileSummaryVerificationType;
 }
-enum statusType {
-  pending = "pending",
-  approved = "approved",
-  rejected = "rejected",
-}
+
 const CvSchema: Schema<cvSchemaDataType> = new Schema(
   {
     nanoId: {
@@ -123,12 +133,15 @@ const CvSchema: Schema<cvSchemaDataType> = new Schema(
       class10School: { type: String },
       class10Board: { type: String },
       class10Grade: { type: Number },
+      class10CertUrl: { type: String},
       class12College: { type: String },
       class12Board: { type: String },
       class12Grade: { type: Number },
+      class12CertUrl: { type: String},
       underGraduateCollege: { type: String },
       underGraduateDegree: { type: String },
       underGraduateGPA: { type: Number },
+      underGraduateCertUrl: { type: String},
       underGraduateDuration:{
         duration: {
           from: { type: String, required: true },
@@ -138,6 +151,7 @@ const CvSchema: Schema<cvSchemaDataType> = new Schema(
       postGraduateCollege: { type: String },
       postGraduateDegree: { type: String },
       postGraduateGPA: { type: Number },
+      postGraduateCertUrl: { type: String},
       postGraduateDuration:{
         duration: {
           from: { type: String, required: true },
@@ -154,11 +168,13 @@ const CvSchema: Schema<cvSchemaDataType> = new Schema(
           to: { type: String },
         },
         job_role: { type: String, required: true },
+        experienceCertUrl: { type: String},
       },
     ],
-    skills: {
-      type: [String],
-    },
+    skills: [{
+        skillName: { type: String, required: true },
+        skillUrl: { type: String},
+      }],
     achievements: {
       awards: [
         {
@@ -166,6 +182,7 @@ const CvSchema: Schema<cvSchemaDataType> = new Schema(
           awarding_organization: { type: String, required: true },
           date_of_achievement: { type: String, required: true },
           description: { type: String, required: true },
+          awardCertUrl: { type: String},
         },
       ],
       courses: [
@@ -177,6 +194,7 @@ const CvSchema: Schema<cvSchemaDataType> = new Schema(
             to: { type: String, required: true },
           },
           description: { type: String, required: true },
+          courseCertUrl: { type: String},
         },
       ],
       projects: [
@@ -188,6 +206,7 @@ const CvSchema: Schema<cvSchemaDataType> = new Schema(
             to: { type: String, required: true },
           },
           description: { type: String, required: true },
+          projectCertUrl:{type:String},
         },
       ],
     },
@@ -245,11 +264,7 @@ const CvSchema: Schema<cvSchemaDataType> = new Schema(
           default: [],
         },
         // TODO: mail status;
-        mailStatus: {
-          type: String,
-          enum: Object.values(statusType),
-          default: statusType.pending,
-        },
+
       },
       class12: {
         isSelfAttested: {
@@ -261,11 +276,6 @@ const CvSchema: Schema<cvSchemaDataType> = new Schema(
           default: [],
         },
         // TODO: mail status;
-        mailStatus: {
-          type: String,
-          enum: Object.values(statusType),
-          default: statusType.pending,
-        },
       },
       undergraduation: {
         isSelfAttested: {
@@ -277,11 +287,7 @@ const CvSchema: Schema<cvSchemaDataType> = new Schema(
           default: [],
         },
         // TODO: mail status;
-        mailStatus: {
-          type: String,
-          enum: Object.values(statusType),
-          default: statusType.pending,
-        },
+
       },
       postgraduation: {
         isSelfAttested: {
@@ -293,11 +299,6 @@ const CvSchema: Schema<cvSchemaDataType> = new Schema(
           default: [],
         },
         // TODO: mail status;
-        mailStatus: {
-          type: String,
-          enum: Object.values(statusType),
-          default: statusType.pending,
-        },
       },
     },
     // step 3;
@@ -312,11 +313,7 @@ const CvSchema: Schema<cvSchemaDataType> = new Schema(
           type: [String],
           default: [],
         },
-        mailStatus: {
-          type: String,
-          enum: Object.values(statusType),
-          default: statusType.pending,
-        },
+
         // TODO: mail status;
       },
     },
@@ -332,11 +329,7 @@ const CvSchema: Schema<cvSchemaDataType> = new Schema(
           type: [String],
           default: [],
         },
-        mailStatus: {
-          type: String,
-          enum: Object.values(statusType),
-          default: statusType.pending,
-        },
+
         // TODO: mail status;
       },
     },
@@ -353,11 +346,7 @@ const CvSchema: Schema<cvSchemaDataType> = new Schema(
           type: [String],
           default: [],
         },
-        mailStatus: {
-          type: String,
-          enum: Object.values(statusType),
-          default: statusType.pending,
-        },
+
         // TODO: mail status;
       },
     },
@@ -373,11 +362,7 @@ const CvSchema: Schema<cvSchemaDataType> = new Schema(
           type: [String],
           default: [],
         },
-        mailStatus: {
-          type: String,
-          enum: Object.values(statusType),
-          default: statusType.pending,
-        },
+
         // TODO: mail status;
       },
     },
