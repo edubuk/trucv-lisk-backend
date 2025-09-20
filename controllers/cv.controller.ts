@@ -276,28 +276,28 @@ export const createCv = async (req: Request, res: Response) => {
 
     
 
-    if (Experience.length > 0) {
+    if (Experience?.length > 0) {
       dataToBeStored.experience = Experience;
     }
 
-    if (Skills.length > 0) {
+    if (Skills?.length > 0) {
       dataToBeStored.skills = Skills;
     }
 
-    if (Awards.length > 0) {
+    if (Awards?.length > 0) {
       dataToBeStored.achievements = {
         awards: Awards,
       };
     }
 
-    if (Courses.length > 0) {
+    if (Courses?.length > 0) {
       dataToBeStored.achievements = {
         ...dataToBeStored.achievements,
         courses: Courses,
       };
     }
 
-    if (Projects.length > 0) {
+    if (Projects?.length > 0) {
       dataToBeStored.achievements = {
         ...dataToBeStored.achievements,
         projects: Projects,
